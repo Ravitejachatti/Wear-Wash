@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UserDashboard from './components/Dashboard/UserDashboard';
 import AdminDashboard from './components/Dashboard/AdminDashboard';
+import SlotBooking from './components/Booking/SlotBooking';
 import './App.css';
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/user-dashboard" element={<UserDashboard />} />
+          <Route path='/slotbooking' element={<SlotBooking/>}/>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
         </Routes>
       </Router>

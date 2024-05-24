@@ -1,4 +1,4 @@
-const Booking = require('../models/Booking.jsx');
+const Booking = require('../models/Booking.js');
 
 exports.sendNotification = async (req, res) => {
   const { bookingId } = req.body;

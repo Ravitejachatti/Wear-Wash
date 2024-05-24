@@ -11,20 +11,20 @@ const bookingSchema = new mongoose.Schema({
     ref: 'Machine',
     required: true,
   },
-  slot: {
+  date: {
     type: Date,
     required: true,
   },
-  status: {
+  timeSlot: {
     type: String,
-    enum: ['pending', 'confirmed', 'completed'],
-    default: 'pending',
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid'],
-    default: 'pending',
-  },
-});
-
+    required: true,
+    validate: {
+      validator: function(v) {
+        // Ensure timeSlot is in the correct format
+        return /^([01]?[0-9]|2[0-3]):00 - ([01]?[0-9]|2[0-3]):00$/.test(v);
+      },
+      message: props => `${props.value} is not a valid time slot format!`
+    }
+  }
+}, { timestamps: true });
 module.exports = mongoose.model('Booking', bookingSchema);

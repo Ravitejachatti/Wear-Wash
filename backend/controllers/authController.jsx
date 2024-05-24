@@ -1,32 +1,83 @@
-const User = require('../models/User.jsx');
-const bcrypt = require('bcryptjs');
+const asynchandler = require('express-async-handler');
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const dotenv = require('dotenv').config();
 
-exports.register = async (req, res) => {
-  const { username, email, password, role } = req.body;
-  try {
-    const user = new User({ username, email, password, role });
-    await user.save();
-    res.status(201).json({ message: 'User registered successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error });
+//@desc register a user
+//@route POST /api/user/register
+//@access public
+const register = asynchandler(async (req, res) => {
+  const { username, email, password,role } = req.body;
+  console.log(username, email, password);
+  if (!username || !email || !password||!role) {
+    res.status(400);
+    throw new Error('ALL fields are mandatory');
   }
-};
+  console.log("user re")
+  const userAvailable = await User.findOne({ email });
+  console.log(userAvailable);
+  if (userAvailable) {
+    res.status(400);
+    throw new Error('user already registered');
+  }
+  const Hashedpassword = await bcrypt.hash(password, 10);
+  console.log(Hashedpassword);
+  const user = await User.create({
+    username,
+    email,
+    password: Hashedpassword,
+    role,
+  });
+  console.log(`user created ${user}`);
+  if (user) {
+    res.status(201).json({ _id: user.id, email: user.email });
+  } else {
+    res.status(400);
+    throw new Error('User data is not valid');
+  }
+  res.json({ message: 'register the user' });
+});
 
-exports.login = async (req, res) => {
+//@desc login a user
+//@route POST /api/user/login
+//@access public
+const login = asynchandler(async (req, res) => {
   const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Invalid credentials' });
-    }
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({ token });
-  } catch (error) {
-    res.status(500).json({ message: 'Error logging in', error });
+  console.log(password)
+  if (!email || !password) {
+    res.status(400);
+    throw new Error('All fields are mandatory!');
   }
-};
+  const user = await User.findOne({ email });
+  
+  console.log(user)
+  
+  if (user && (await bcrypt.compare(password, user.password))) {
+    
+    const accessToken = jwt.sign(
+      {
+        user: {
+          username: user.username,
+          email: user.email,
+          id: user.id,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '15m' }
+    );
+    res.status(200).json({ accessToken });
+  } else {
+    res.status(401);
+    throw new Error('email or password is not valid');
+  }
+});
+
+//@desc current user
+//@route POST /api/user/current
+//@access private
+// const currentUser = asynchandler(async (req, res) => {
+//   res.json(req.user);
+// });
+
+module.exports = { register, login };

@@ -18,13 +18,14 @@ const mongoose = require('mongoose');
 
 const dbConnect = async() => {
   try{
-    const connect = await mongoose.connect("mongodb://localhost:27017", { dbName: "wearWash" });
+    const connect = await mongoose.connect("mongodb://127.0.0.1:27017/wearWash");
     console.log("Database Connected:",
      connect.connection.host,
      connect.connection.name
      )
   }
   catch(err){
+      console.log("database not connected")
       console.log(err);
       process.exit(1);
   }

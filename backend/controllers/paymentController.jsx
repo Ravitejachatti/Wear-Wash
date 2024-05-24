@@ -1,4 +1,4 @@
-const Booking = require('../models/Booking.jsx');
+const Booking = require('../models/Booking.js');
 const { processPayment } = require('../utils/paymentGateway.jsx');
 
 exports.makePayment = async (req, res) => {
